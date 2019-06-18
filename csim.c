@@ -219,7 +219,7 @@ int main( int argc,char* argv[] ) {
                 pointer = pointer->next;
             }
             if( status == Unknown ){
-                if ( list[setIndex].size < globalArgs.E ) { //Cache miss
+                if ( list[setIndex].size < globalArgs.E ) { //Cache miss and no eviction
 
                     //Update:
                     if( buf[1] == 'M' ) {
@@ -234,10 +234,14 @@ int main( int argc,char* argv[] ) {
                     /* Adjust the double linked list 
                      * so that the missed cache will be insterted into the corresponding double linked list cache-simulator.
                      */
-                    //TODO
-
-
-                } else {
+                    PNode pointer = ( PNode )malloc( sizeof( Node ) );
+                    memcpy( pointer->tag, address, 64 );
+                    pointer->prev = list[setIndex].head;
+                    pointer->next = pointer->prev->next;
+                    list[setIndex].head->next = pointer;
+                    pointer->next->prev = pointer;
+                    list[setIndex].size ++;
+                } else { // Cache miss and eviction
 
                     //Update:
                     if( buf[1] == 'M' ) {
@@ -251,7 +255,14 @@ int main( int argc,char* argv[] ) {
                         status = Miss;
                     }
 
-                    //TODO
+                    PNode pointer=list[setIndex].tail->prev;
+                    pointer->prev->next = list[setIndex].tail;
+                    list[setIndex].tail->prev = pointer->prev;
+                    memcpy( pointer->tag, address, 64 );
+                    pointer->prev = list[setIndex].head;
+                    pointer->next = pointer->prev->next;
+                    list[setIndex].head->next = pointer;
+                    pointer->next->prev = pointer;
                 }
             }
 
