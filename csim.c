@@ -178,11 +178,12 @@ int main( int argc,char* argv[] ) {
                     default:
                         break;
                 }
+                pos2 -= 4;
             }
 
             int setIndex = 0;
             for ( int i = 63 - globalArgs.b; i >= t; i-- ) {
-                setIndex = 2*setIndex + (int)(buf[i]);
+                setIndex = 2*setIndex + (int)(address[i]);
             }
 
             memset( address + t, 0, sizeof( char )*( 64 - t ) );
@@ -191,7 +192,7 @@ int main( int argc,char* argv[] ) {
             int status = Unknown;
             while ( pointer != list[setIndex].tail ) {
                 if ( pointer->valid ) {
-                    if ( memcmp( pointer->tag, address, t ) ){ // Cache hit!
+                    if ( memcmp( pointer->tag, address, t ) ==0 ) { // Cache hit!
                         /* Adjust the double linked list 
                          * so that the latest-recently used node is the first node following the head node.
                          */
@@ -235,6 +236,7 @@ int main( int argc,char* argv[] ) {
                      * so that the missed cache will be insterted into the corresponding double linked list cache-simulator.
                      */
                     PNode pointer = ( PNode )malloc( sizeof( Node ) );
+                    pointer->valid = 1;
                     memcpy( pointer->tag, address, 64 );
                     pointer->prev = list[setIndex].head;
                     pointer->next = pointer->prev->next;
