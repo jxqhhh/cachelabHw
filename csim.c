@@ -219,8 +219,39 @@ int main( int argc,char* argv[] ) {
                 pointer = pointer->next;
             }
             if( status == Unknown ){
-                if ( list[setIndex].size < globalArgs.E ) {
-                    
+                if ( list[setIndex].size < globalArgs.E ) { //Cache miss
+
+                    //Update:
+                    if( buf[1] == 'M' ) {
+                        misses ++;
+                        hits ++;
+                        status = Hit;
+                    } else {
+                        misses ++;
+                        status = Miss;
+                    }
+
+                    /* Adjust the double linked list 
+                     * so that the missed cache will be insterted into the corresponding double linked list cache-simulator.
+                     */
+                    //TODO
+
+
+                } else {
+
+                    //Update:
+                    if( buf[1] == 'M' ) {
+                        misses ++;
+                        hits ++;
+                        evictions ++;
+                        status = Hit;
+                    } else {
+                        misses ++;
+                        evictions ++;
+                        status = Miss;
+                    }
+
+                    //TODO
                 }
             }
 
