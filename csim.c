@@ -257,7 +257,7 @@ int main( int argc,char* argv[] ) {
                         status = Miss;
                     }
 
-                    PNode pointer=list[setIndex].tail->prev;
+                    PNode pointer = list[setIndex].tail->prev;
                     pointer->prev->next = list[setIndex].tail;
                     list[setIndex].tail->prev = pointer->prev;
                     memcpy( pointer->tag, address, 64 );

@@ -1,3 +1,7 @@
+/*
+ * Name: Xinqi Jin
+ * loginID: 2016010524
+ */
 /* 
  * trans.c - Matrix transpose B = A^T
  *
@@ -22,6 +26,15 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+    int i, j;
+    int* pointer;
+    for (i=0; i<M; i++) {
+        pointer = &(B[0][i]);
+        for (j=0; j<N; j++) {
+            *pointer = A[i][j];
+            pointer += M;
+        }
+    }
 }
 
 /* 
