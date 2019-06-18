@@ -10,6 +10,9 @@ loginID:2016010524
 #include <string.h>
 #include <malloc.h>
 
+const int Hit = 1;
+const int Miss = 2;
+const int Unknown = -1;
 typedef struct Node* PNode; 
 typedef struct Node { // Node of the double linked list.
     int valid; // The valid bit.
@@ -71,7 +74,11 @@ int main( int argc,char* argv[] ) {
         opt = getopt( argc, argv, optString );
     }
 
-    //int t = 64 - globalArgs.b - globalArgs.s; //size of Tag bits
+    const int t = 64 - globalArgs.b - globalArgs.s; //size of Tag bits
+    int num_of_Sets = 1; // #Sets = 2^s
+    for( int i = 0; i < globalArgs.s; i++ ) {
+        num_of_Sets *= 2;
+    }
 
     /* Declare three variables used to store the result. */
     int hits = 0;
@@ -81,14 +88,16 @@ int main( int argc,char* argv[] ) {
     /* Parse the trace file line by line. */
     FILE *fp = fopen( globalArgs.tracefile, "r" );
     char buf[1024];
-    DoubleLinkedList list; // Use a double linked list to simulate the cache.
-    list.head = ( PNode )malloc( sizeof( Node ) );
-    list.tail = ( PNode )malloc( sizeof( Node ) );
-    list.head->prev = NULL;
-    list.head->next = list.tail;
-    list.tail->prev = list.head;
-    list.tail->next = NULL;
-    list.size = 0;
+    DoubleLinkedList list[num_of_Sets]; // Use a double linked list array to simulate the cache.
+    for( int i = 0; i < num_of_Sets; i++ ) {
+        list[i].head = ( PNode )malloc( sizeof( Node ) );
+        list[i].tail = ( PNode )malloc( sizeof( Node ) );
+        list[i].head->prev = NULL;
+        list[i].head->next = list[i].tail;
+        list[i].tail->prev = list[i].head;
+        list[i].tail->next = NULL;
+        list[i].size = 0;
+    }
     char address[64];
     while ( fgets( buf, sizeof(buf), fp ) != NULL ) {
         if( buf[0] == ' ' ){
@@ -105,82 +114,117 @@ int main( int argc,char* argv[] ) {
                     case '0':
                         break;
                     case '1':
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;                       
                     case '2':
-                        address[ pos + 2 ] = 1;
+                        address[ pos2 + 2 ] = 1;
                         break;
                     case '3':
-                        address[ pos + 2 ] = 1;
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 + 2 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;
                     case '4':
-                        address[ pos + 1 ] = 1;
+                        address[ pos2 + 1 ] = 1;
                         break;
                     case '5':
-                        address[ pos + 1 ] = 1;
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 + 1 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;
                     case '6':
-                        address[ pos + 1 ] = 1;
-                        address[ pos + 2 ] = 1;
+                        address[ pos2 + 1 ] = 1;
+                        address[ pos2 + 2 ] = 1;
                         break;
                     case '7':
-                        address[ pos + 1 ] = 1;
-                        address[ pos + 2 ] = 1;
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 + 1 ] = 1;
+                        address[ pos2 + 2 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;   
                     case '8':
-                        address[ pos ] = 1;
+                        address[ pos2 ] = 1;
                         break;
                     case '9':
-                        address[ pos ] = 1;
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;                       
                     case 'a':
-                        address[ pos ] = 1;
-                        address[ pos + 2 ] = 1;
+                        address[ pos2 ] = 1;
+                        address[ pos2 + 2 ] = 1;
                         break;
                     case 'b':
-                        address[ pos ] = 1;
-                        address[ pos + 2 ] = 1;
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 ] = 1;
+                        address[ pos2 + 2 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;
                     case 'c':
-                        address[ pos ] = 1;
-                        address[ pos + 1 ] = 1;
+                        address[ pos2 ] = 1;
+                        address[ pos2 + 1 ] = 1;
                         break;
                     case 'd':
-                        address[ pos ] = 1;
-                        address[ pos + 1 ] = 1;
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 ] = 1;
+                        address[ pos2 + 1 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;
                     case 'e':
-                        address[ pos ] = 1;
-                        address[ pos + 1 ] = 1;
-                        address[ pos + 2 ] = 1;
+                        address[ pos2 ] = 1;
+                        address[ pos2 + 1 ] = 1;
+                        address[ pos2 + 2 ] = 1;
                         break;
                     case 'f':
-                        address[ pos ] = 1;
-                        address[ pos + 1 ] = 1;
-                        address[ pos + 2 ] = 1;
-                        address[ pos + 3 ] = 1;
+                        address[ pos2 ] = 1;
+                        address[ pos2 + 1 ] = 1;
+                        address[ pos2 + 2 ] = 1;
+                        address[ pos2 + 3 ] = 1;
                         break;
                     default:
-                        break;                                                                                                                                                                                       
-
+                        break;
                 }
             }
 
-            PNode pointer = list.head->next;
-            int cached = 0;
-            while ( pointer != list.tail ) {
-                if( pointer->valid ) {
-                    cached=pos2;
-                    pos2=cached;
+            int setIndex = 0;
+            for ( int i = 63 - globalArgs.b; i >= t; i-- ) {
+                setIndex = 2*setIndex + (int)(buf[i]);
+            }
+
+            memset( address + t, 0, sizeof( char )*( 64 - t ) );
+
+            PNode pointer = list[setIndex].head->next;
+            int status = Unknown;
+            while ( pointer != list[setIndex].tail ) {
+                if ( pointer->valid ) {
+                    if ( memcmp( pointer->tag, address, t ) ){ // Cache hit!
+                        /* Adjust the double linked list 
+                         * so that the latest-recently used node is the first node following the head node.
+                         */
+                        status = Hit;
+                        PNode next = pointer->next;
+                        PNode prev = pointer->prev;
+                        prev->next = next;
+                        next->prev = prev;
+                        PNode first = list[setIndex].head->next;
+                        list[setIndex].head->next = pointer;
+                        pointer->prev = list[setIndex].head;
+                        pointer->next = first;
+                        first->prev = pointer;
+
+                        // Update hits:
+                        if( buf[1] == 'M' ) {
+                            hits += 2;
+                        } else {
+                            hits ++;
+                        }
+                        break;
+                    }
+
                 }
                 pointer = pointer->next;
             }
+            if( status == Unknown ){
+                if ( list[setIndex].size < globalArgs.E ) {
+                    
+                }
+            }
+
+
         }
     }
 
