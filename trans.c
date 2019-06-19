@@ -26,6 +26,22 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+    int i,j,k;
+    if(M==32){
+        for(i=0;i<32;i+=8){
+            for(j=0;j<32;j+=8){
+                for(k=i;k<i+8;k++){
+                    for ( h = j; h < j + 8; h ++ ) {
+                        B[h][k] = A[k][h];
+                    }
+                }
+            }
+        }
+    }else{
+        //TODO
+    }
+}
+    /* 
     int a1, a2, a3, a4, a5, a6, a7, a8;
     int i, j, k, h;
     if ( M == 32 ) { // Case1: M=32, N=32
@@ -118,8 +134,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                 pointer += M;
             }
         }
-    }
-}
+    }*/
 
 /* 
  * You can define additional transpose functions below. We've defined
