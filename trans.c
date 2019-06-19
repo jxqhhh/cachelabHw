@@ -26,13 +26,97 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
-    int i, j;
-    int* pointer;
-    for (i=0; i<M; i++) {
-        pointer = &(B[0][i]);
-        for (j=0; j<N; j++) {
-            *pointer = A[i][j];
-            pointer += M;
+    int a1, a2, a3, a4, a5, a6, a7, a8;
+    int i, j, k, h;
+    if ( M == 32 ) { // Case1: M=32, N=32
+        for ( i = 0; i < 32; i += 8) {
+            for ( j = 0; j < 32; j += 8 ) {
+                for ( k = i; k < i + 8; k ++ ) {
+                    if ( i == j ) {
+                        a1 = A[k][j];
+                        a2 = A[k][j+1];
+                        a3 = A[k][j+2];
+                        a4 = A[k][j+3];
+                        a5 = A[k][j+4];
+                        a6 = A[k][j+5];
+                        a7 = A[k][j+6];
+                        a8 = A[k][j+7];
+                        B[j][k] = a1;
+                        B[j+1][k] = a2;
+                        B[j+2][k] = a3;
+                        B[j+3][k] = a4;
+                        B[j+4][k] = a5;
+                        B[j+5][k] = a6;
+                        B[j+6][k] = a7;
+                        B[j+7][k] = a8;
+                        continue;
+                    }
+                    for ( h = j; h < j + 8; h ++ ) {
+                        B[h][k] = A[k][h];
+                    }
+                }
+            }
+        }
+    } else if (M==64) { // Case2: M=64, N=64
+        for(i=0; i<64; i+=8) {
+            for(j=0; j<64; j+=8){
+                for(k=i;k<i+4;k++){
+                    a1=A[k][j];
+                    a2=A[k][j+1];
+                    a3=A[k][j+2];
+                    a4=A[k][j+3];
+                    a5=A[k][j+4];
+                    a6=A[k][j+5];
+                    a7=A[k][j+6];
+                    a8=A[k][j+7];
+                    B[j][k]=a1;
+                    B[j+1][k]=a2;
+                    B[j+2][k]=a3;
+                    B[j+3][k]=a4;
+                    B[j][k+4]=a5;
+                    B[j+1][k+4]=a6;
+                    B[j+2][k+4]=a7;
+                    B[j+3][k+4]=a8;
+                }
+                for(k=j;k<j+4;k++){
+                    a1=A[i+4][k];
+                    a2=A[i+5][k];
+                    a3=A[i+6][k];
+                    a4=A[i+7][k];
+                    a5=B[k][i+4];
+                    a6=B[k][i+5];
+                    a7=B[k][i+6];
+                    a8=B[k][i+7];
+                    B[k][i+4]=a1;
+                    B[k][i+5]=a2;
+                    B[k][i+6]=a3;
+                    B[k][i+7]=a4;
+                    B[k+4][i]=a5;
+                    B[k+4][i+1]=a6;
+                    B[k+4][i+2]=a7;
+                    B[k+4][i+3]=a8;
+                }
+                for(k=i+4;k<i+8;k++){
+                    a1=A[k][j+4];
+                    a2=A[k][j+5];
+                    a3=A[k][j+6];
+                    a4=A[k][j+7];
+                    B[j+4][k]=a1;
+                    B[j+5][k]=a2;
+                    B[j+6][k]=a3;
+                    B[j+7][k]=a4;
+                }
+            }
+        }
+    } else { // Case3: M=61, N=67
+        int i, j;
+        int* pointer;
+        for (i=0; i<M; i++) {
+            pointer = &(B[0][i]);
+            for (j=0; j<N; j++) {
+                *pointer = A[i][j];
+                pointer += M;
+            }
         }
     }
 }
