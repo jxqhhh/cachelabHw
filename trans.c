@@ -31,7 +31,9 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
     if ( M == 32 ) { // Case1: M=32, N=32
         for ( i = 0; i < 32; i += 8) {
             for ( j = 0; j < 32; j += 8 ) {
+                // diagonal 8*8 submatirx:
                 if ( i == j ) {
+                    // copy the diagonal submatrix:
                     for ( k = i; k < i + 8; k ++ ) {
                         a1 = A[k][j];
                         a2 = A[k][j+1];
@@ -50,17 +52,20 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                         B[k][j+6] = a7;
                         B[k][j+7] = a8;
                     }
+
+                    // transpose in-place:
                     for( k = i; k < i + 8 ; k ++ ){
                         for( h = k + 1 ; h < i + 8; h ++ ){
-                            a1=B[k][h];
-                            a2=B[h][k];
-                            B[k][h]=a2;
-                            B[h][k]=a1;
+                            a1 = B[k][h];
+                            a2 = B[h][k];
+                            B[k][h] = a2;
+                            B[h][k] = a1;
                         }
                     }
                     continue;
                 }
 
+                // non-diagonal 8*8 submatrix:S
                 for ( k = i; k < i + 8; k ++ ) {
                     for ( h = j; h < j + 8; h ++ ) {
                         B[h][k] = A[k][h];
@@ -68,7 +73,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                 }
             }
         }
-    } else if ( M == 64 ) {
+    } else if ( M == 64 ) { // Case2: M=64, N=64
         for ( i = 0; i < 64; i += 4 ) {
             for ( j = 0; j < 64; j += 4 ) {
                 for ( k = i; k < i + 4; k ++ ) {
@@ -83,7 +88,9 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                 }
             }
         }
-    } else {
+    } else if ( M == 61 ) { // Case3: M=61, N=67
+
+    } else { // Case4: M=64, N=64
 
     }
     /* else if (M==64) { // Case2: M=64, N=64
