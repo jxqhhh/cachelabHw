@@ -127,8 +127,8 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
             }
         }
     } else if ( M == 61 ) { // Case3: M=61, N=67
-        for ( i = 0; i < 64; i ++ ) {
-            for ( j = 0; j < 48; j ++ ) {
+        for ( i = 0; i < 80; i += 16 ) {
+            for ( j = 0; j < 64; j += 16 ) {
                 for ( k = i; ( k < i + 16 ) && ( k < 67 ); k ++ ) {
                     for ( h = j; ( h < j + 16 ) && ( h < 61 ); h ++ ) {
                         B[h][k]=A[k][h];
