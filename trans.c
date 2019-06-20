@@ -74,18 +74,56 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
             }
         }
     } else if ( M == 64 ) { // Case2: M=64, N=64
-        for ( i = 0; i < 64; i += 4 ) {
-            for ( j = 0; j < 64; j += 4 ) {
-                for ( k = i; k < i + 4; k ++ ) {
-                        a1 = A[k][j];
-                        a2 = A[k][j+1];
-                        a3 = A[k][j+2];
-                        a4 = A[k][j+3];
-                        B[j][k] = a1;
-                        B[j+1][k] = a2;
-                        B[j+2][k] = a3;
-                        B[j+3][k] = a4;
+        for ( i = 0; i < 64; i += 8 ) {
+            for ( j = 0; j < 64; j += 8 ) {
+
+                // Step 1:
+                for ( k = 0; k < 4; k ++ ) {
+                    a1 = A[i+k][j];
+                    a2 = A[i+k][j+1];
+                    a3 = A[i+k][j+2];
+                    a4 = A[i+k][j+3];
+                    a5 = A[i+k][j+4];
+                    a6 = A[i+k][j+5];
+                    a7 = A[i+k][j+6];
+                    a8 = A[i+k][j+7];
+                    B[j][i+k] = a1;
+                    B[j+1][i+k] = a2;
+                    B[j+2][i+k] = a3;
+                    B[j+3][i+k] = a4;
+                    B[j][i+k+4] = a5;
+                    B[j+1][i+k+4] = a6;
+                    B[j+2][i+k+4] = a7;
+                    B[j+3][i+k+4] = a8;
                 }
+
+                // Step 2:
+                for ( k = 0; k < 4; k ++ ) {
+                    a1 = A[i+4][j+k];
+                    a2 = A[i+5][j+k];
+                    a3 = A[i+6][j+k];
+                    a4 = A[i+7][j+k];
+                    a5 = B[j+k][i+4];
+                    a6 = B[j+k][i+5];
+                    a7 = B[j+k][i+6];
+                    a8 = B[j+k][i+7];
+                    B[j+k][i+4] = a1;
+                    B[j+k][i+5] = a2;
+                    B[j+k][i+6] = a3;
+                    B[j+k][i+7] = a4;
+                    B[j+k+4][i] = a5;
+                    B[j+k+4][i+1] = a6;
+                    B[j+k+4][i+2] = a7;
+                    B[j+k+4][i+3] = a8;
+                }
+                
+                // Step 3:
+                for ( k = i + 4; k < i + 8; k ++ ) {
+                    for ( h = j + 4; h < j + 8; h ++ ){
+                        B[h][k]=A[k][h];
+                    }
+                }
+
             }
         }
     } else if ( M == 61 ) { // Case3: M=61, N=67
