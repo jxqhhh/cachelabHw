@@ -138,69 +138,59 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
         }
     } else { // Case4: M=64, N=64
 
+        // Copy:
+        for ( i = 0; i < 48; i ++ ) {
+            for ( j = 0; j < 6; j ++ ) {
+                a1 = A[i][8*j+0];
+                a2 = A[i][8*j+1];
+                a3 = A[i][8*j+2];
+                a4 = A[i][8*j+3];
+                a5 = A[i][8*j+4];
+                a6 = A[i][8*j+5];
+                a7 = A[i][8*j+6];
+                a8 = A[i][8*j+7];
+                B[i][8*j+0] = a1;
+                B[i][8*j+1] = a2;
+                B[i][8*j+2] = a3;
+                B[i][8*j+3] = a4;
+                B[i][8*j+4] = a5;
+                B[i][8*j+5] = a6;
+                B[i][8*j+6] = a7;
+                B[i][8*j+7] = a8;
+            }
+        }
+
+        // Transpose in-place:
+        for ( i = 0; i < 48; i += 8) {
+            for ( j = 0; j < 48; j += 8 ) {
+
+                // diagonal 8*8 submatirx:
+                if ( i == j ) {
+                    for( k = i; k < i + 8 ; k ++ ){
+                        for( h = k + 1 ; h < i + 8; h ++ ){
+                            a1 = B[k][h];
+                            a2 = B[h][k];
+                            B[k][h] = a2;
+                            B[h][k] = a1;
+                        }
+                    }
+                    continue;
+                }
+
+                // non-diagonal 8*8 submatrix:S
+                if( i < j ) {
+                    for ( k = i; k < i + 8; k ++ ) {
+                        for ( h = j; h < j + 8; h ++ ) {
+                            a1 = B[h][k];
+                            a2 = B[k][h];
+                            B[k][h] = a1;
+                            B[h][k] = a2;
+                        }
+                    }
+                }
+            }
+        }
     }
-    /* else if (M==64) { // Case2: M=64, N=64
-        for(i=0; i<64; i+=8) {
-            for(j=0; j<64; j+=8){
-                for(k=i;k<i+4;k++){
-                    a1=A[k][j];
-                    a2=A[k][j+1];
-                    a3=A[k][j+2];
-                    a4=A[k][j+3];
-                    a5=A[k][j+4];
-                    a6=A[k][j+5];
-                    a7=A[k][j+6];
-                    a8=A[k][j+7];
-                    B[j][k]=a1;
-                    B[j+1][k]=a2;
-                    B[j+2][k]=a3;
-                    B[j+3][k]=a4;
-                    B[j][k+4]=a5;
-                    B[j+1][k+4]=a6;
-                    B[j+2][k+4]=a7;
-                    B[j+3][k+4]=a8;
-                }
-                for(k=j;k<j+4;k++){
-                    a1=A[i+4][k];
-                    a2=A[i+5][k];
-                    a3=A[i+6][k];
-                    a4=A[i+7][k];
-                    a5=B[k][i+4];
-                    a6=B[k][i+5];
-                    a7=B[k][i+6];
-                    a8=B[k][i+7];
-                    B[k][i+4]=a1;
-                    B[k][i+5]=a2;
-                    B[k][i+6]=a3;
-                    B[k][i+7]=a4;
-                    B[k+4][i]=a5;
-                    B[k+4][i+1]=a6;
-                    B[k+4][i+2]=a7;
-                    B[k+4][i+3]=a8;
-                }
-                for(k=i+4;k<i+8;k++){
-                    a1=A[k][j+4];
-                    a2=A[k][j+5];
-                    a3=A[k][j+6];
-                    a4=A[k][j+7];
-                    B[j+4][k]=a1;
-                    B[j+5][k]=a2;
-                    B[j+6][k]=a3;
-                    B[j+7][k]=a4;
-                }
-            }
-        }
-    } else { // Case3: M=61, N=67
-        int i, j;
-        int* pointer;
-        for (i=0; i<M; i++) {
-            pointer = &(B[0][i]);
-            for (j=0; j<N; j++) {
-                *pointer = A[i][j];
-                pointer += M;
-            }
-        }
-    }*/
 }
 /* 
  * You can define additional transpose functions below. We've defined
