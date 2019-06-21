@@ -78,7 +78,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
         for ( i = 0; i < 64; i += 8 ) {
             for ( j = 0; j < 64; j += 8 ) {
 
-                // Step 1:
+                // Step 1 (Refer to the document for detail):
                 for ( k = 0; k < 4; k ++ ) {
                     a1 = A[i+k][j];
                     a2 = A[i+k][j+1];
@@ -98,7 +98,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                     B[j+3][i+k+4] = a8;
                 }
 
-                // Step 2:
+                // Step 2 (Refer to the document for detail):
                 for ( k = 0; k < 4; k ++ ) {
                     a1 = A[i+4][j+k];
                     a2 = A[i+5][j+k];
@@ -118,7 +118,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
                     B[j+k+4][i+3] = a8;
                 }
                 
-                // Step 3:
+                // Step 3 (Refer to the document for detail):
                 for ( k = i + 4; k < i + 8; k ++ ) {
                     for ( h = j + 4; h < j + 8; h ++ ) {
                         B[h][k] = A[k][h];
