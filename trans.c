@@ -23,6 +23,51 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
  *     searches for that string to identify the transpose function to
  *     be graded. 
  */
+
+char test_desc[]="Test"
+void test(int M,int N,int A[N][M],int B[M][N]){
+// Copy:
+    for ( i = 0; i < 48; i ++ ) {
+        for ( j = 0; j < 6; j ++ ) {
+            a1 = A[i][8*j+0];
+            a2 = A[i][8*j+1];
+            a3 = A[i][8*j+2];
+            a4 = A[i][8*j+3];
+            a5 = A[i][8*j+4];
+            a6 = A[i][8*j+5];
+            a7 = A[i][8*j+6];
+            a8 = A[i][8*j+7];
+            B[8*j+0][i]= a1;
+            B[8*j+1][i] = a2;
+            B[8*j+2][i] = a3;
+            B[8*j+3][i] = a4;
+            B[8*j+4][i] = a5;
+            B[8*j+5][i] = a6;
+            B[8*j+6][i] = a7;
+            B[8*j+7][i]= a8;
+        }
+    }
+
+    // Transpose in-place:
+    for ( i = 0; i < 48; i += 8) {
+        for ( j = 0; j < 48; j += 8 ) {
+
+
+            // non-diagonal 8*8 submatrix:S
+            if( i < j ) {
+                for ( k = i; k < i + 8; k ++ ) {
+                    for ( h = j; h < j + 8; h ++ ) {
+                        a1 = B[h][k];
+                        a2 = B[k][h];
+                        B[k][h] = a1;
+                        B[h][k] = a2;
+                    }
+                }
+            }
+        }
+    }
+}
+
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
